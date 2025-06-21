@@ -1,0 +1,246 @@
+{% extends 'base.html' %}
+
+{% block title %}Manual de Usuario - Sistema de Seguridad{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <!-- Sidebar de navegación -->
+        <div class="col-md-3">
+            <div class="card sticky-top" style="top: 1rem;">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Contenido</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        <a href="#introduccion" class="list-group-item list-group-item-action">Introducción</a>
+                        <a href="#amenazas" class="list-group-item list-group-item-action">Amenazas Cibernéticas</a>
+                        <a href="#monitoreo" class="list-group-item list-group-item-action">Sistema de Monitoreo</a>
+                        <a href="#dashboard" class="list-group-item list-group-item-action">Dashboard de Seguridad</a>
+                        <a href="#configuracion" class="list-group-item list-group-item-action">Configuración</a>
+                        <a href="#buenas-practicas" class="list-group-item list-group-item-action">Buenas Prácticas</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contenido principal -->
+        <div class="col-md-9">
+            <!-- Introducción -->
+            <section id="introduccion" class="mb-5">
+                <h2 class="mb-4">Introducción</h2>
+                <div class="card">
+                    <div class="card-body">
+                        <p class="lead">
+                            Bienvenido al Sistema de Seguridad Empresarial, una solución integral para la protección
+                            de su empresa contra amenazas cibernéticas.
+                        </p>
+                        <p>
+                            Este sistema proporciona herramientas avanzadas para:
+                        </p>
+                        <ul>
+                            <li>Monitoreo continuo de la infraestructura</li>
+                            <li>Detección proactiva de amenazas</li>
+                            <li>Análisis en tiempo real de la seguridad</li>
+                            <li>Gestión centralizada de la seguridad empresarial</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Amenazas Cibernéticas -->
+            <section id="amenazas" class="mb-5">
+                <h2 class="mb-4">Amenazas Cibernéticas</h2>
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h3 class="card-title h5 mb-0">Tipos de Amenazas</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <h4><i class="bi bi-bug text-danger"></i> Malware</h4>
+                                <p>
+                                    Software malicioso diseñado para dañar o infiltrarse en sistemas.
+                                    Incluye virus, troyanos, ransomware y spyware.
+                                </p>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <h4><i class="bi bi-envelope text-warning"></i> Phishing</h4>
+                                <p>
+                                    Intentos de engaño para obtener información sensible mediante
+                                    correos electrónicos o sitios web falsos.
+                                </p>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <h4><i class="bi bi-lock text-danger"></i> Ransomware</h4>
+                                <p>
+                                    Software que cifra archivos y exige un rescate para su liberación.
+                                    Puede paralizar completamente las operaciones.
+                                </p>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <h4><i class="bi bi-shield-x text-warning"></i> Denegación de Servicio</h4>
+                                <p>
+                                    Ataques que sobrecargan sistemas para hacerlos inaccesibles
+                                    a usuarios legítimos.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Sistema de Monitoreo -->
+            <section id="monitoreo" class="mb-5">
+                <h2 class="mb-4">Sistema de Monitoreo</h2>
+                <div class="card">
+                    <div class="card-body">
+                        <h3 class="h5 mb-3">¿Cómo funciona?</h3>
+                        <p>
+                            Nuestro sistema realiza monitoreo continuo en las siguientes áreas:
+                        </p>
+                        <ul class="list-group list-group-flush mb-4">
+                            <li class="list-group-item bg-transparent">
+                                <i class="bi bi-cpu text-primary"></i>
+                                <strong>Procesos del Sistema:</strong>
+                                Monitoreo de procesos sospechosos y uso anormal de recursos.
+                            </li>
+                            <li class="list-group-item bg-transparent">
+                                <i class="bi bi-hdd-network text-primary"></i>
+                                <strong>Conexiones de Red:</strong>
+                                Análisis de conexiones entrantes y salientes para detectar actividades maliciosas.
+                            </li>
+                            <li class="list-group-item bg-transparent">
+                                <i class="bi bi-file-earmark-binary text-primary"></i>
+                                <strong>Archivos:</strong>
+                                Escaneo de archivos sospechosos y detección de malware.
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Dashboard de Seguridad -->
+            <section id="dashboard" class="mb-5">
+                <h2 class="mb-4">Dashboard de Seguridad</h2>
+                <div class="card">
+                    <div class="card-body">
+                        <h3 class="h5 mb-3">Características Principales</h3>
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <h4><i class="bi bi-graph-up text-success"></i> Estadísticas</h4>
+                                <p>
+                                    Visualización de amenazas detectadas, escaneos realizados
+                                    y estado general de seguridad.
+                                </p>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <h4><i class="bi bi-exclamation-triangle text-warning"></i> Alertas</h4>
+                                <p>
+                                    Notificaciones en tiempo real sobre amenazas detectadas
+                                    y acciones requeridas.
+                                </p>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <h4><i class="bi bi-clock-history text-info"></i> Actividad</h4>
+                                <p>
+                                    Registro detallado de todas las actividades de seguridad
+                                    y eventos del sistema.
+                                </p>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <h4><i class="bi bi-gear text-primary"></i> Configuración</h4>
+                                <p>
+                                    Personalización de alertas y parámetros de monitoreo
+                                    según necesidades específicas.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Configuración -->
+            <section id="configuracion" class="mb-5">
+                <h2 class="mb-4">Configuración del Sistema</h2>
+                <div class="card">
+                    <div class="card-body">
+                        <h3 class="h5 mb-3">Opciones Disponibles</h3>
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Configuración</th>
+                                        <th>Descripción</th>
+                                        <th>Recomendación</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Escaneo Automático</td>
+                                        <td>Frecuencia de escaneos del sistema</td>
+                                        <td>24 horas</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Nivel de Alertas</td>
+                                        <td>Sensibilidad de las notificaciones</td>
+                                        <td>Media y Alta</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Notificaciones</td>
+                                        <td>Tipos de eventos a notificar</td>
+                                        <td>Todas las amenazas</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Buenas Prácticas -->
+            <section id="buenas-practicas" class="mb-5">
+                <h2 class="mb-4">Buenas Prácticas de Seguridad</h2>
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <h4><i class="bi bi-key text-warning"></i> Contraseñas</h4>
+                                <ul>
+                                    <li>Use contraseñas fuertes y únicas</li>
+                                    <li>Cambie las contraseñas regularmente</li>
+                                    <li>Active la autenticación de dos factores</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <h4><i class="bi bi-shield-check text-success"></i> Actualizaciones</h4>
+                                <ul>
+                                    <li>Mantenga el sistema actualizado</li>
+                                    <li>Instale parches de seguridad</li>
+                                    <li>Actualice el software regularmente</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <h4><i class="bi bi-envelope-shield text-info"></i> Correo Electrónico</h4>
+                                <ul>
+                                    <li>Verifique los remitentes</li>
+                                    <li>No abra archivos sospechosos</li>
+                                    <li>No comparta información sensible</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <h4><i class="bi bi-hdd-stack text-primary"></i> Respaldo</h4>
+                                <ul>
+                                    <li>Realice copias de seguridad regularmente</li>
+                                    <li>Almacene los respaldos en ubicaciones seguras</li>
+                                    <li>Pruebe la restauración periódicamente</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+{% endblock %} 

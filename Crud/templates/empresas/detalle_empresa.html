@@ -1,0 +1,587 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ empresa.Nombre_Empresa }} - Aegis Code{% endblock %}
+
+{% block content %}
+<!-- Token CSRF -->
+{% csrf_token %}
+
+<!-- Toast para mensajes de error -->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+    <div id="mensajeError" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header bg-danger text-white">
+            <strong class="me-auto">Error</strong>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body" id="mensajeErrorTexto"></div>
+    </div>
+</div>
+
+<div class="container-fluid">
+    <!-- Encabezado de la empresa -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        {% if empresa.imagen %}
+                            <img src="{{ empresa.imagen.url }}" alt="{{ empresa.Nombre_Empresa }}" class="rounded-circle me-3" style="width: 100px; height: 100px; object-fit: cover;">
+                        {% else %}
+                            <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center me-3" style="width: 100px; height: 100px;">
+                                <i class="bi bi-building text-white display-4"></i>
+                            </div>
+                        {% endif %}
+                        <div>
+                            <h2 class="card-title mb-1">{{ empresa.Nombre_Empresa }}</h2>
+                            <p class="text-muted mb-0">
+                                <i class="bi bi-people"></i> {{ empresa.Cant_Empleados }} empleados
+                                <span class="mx-2">|</span>
+                                <i class="bi bi-person"></i> {{ empresa.representante }}
+                            </p>
+                            <p class="text-muted mb-0">
+                                <i class="bi bi-shield-check"></i> Nivel de Seguridad: 
+                                <span class="badge {% if empresa.nivel_seguridad == 'ALTO' %}bg-success{% elif empresa.nivel_seguridad == 'MEDIO' %}bg-warning{% else %}bg-danger{% endif %}">
+                                    {{ empresa.get_nivel_seguridad_display }}
+                                </span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Acciones</h5>
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'editar_empresa' empresa.pk %}" class="btn btn-outline-primary">
+                            <i class="bi bi-pencil"></i> Editar Empresa
+                        </a>
+                        <a href="{% url 'actualizar_config_monitoreo' empresa.pk %}" class="btn btn-outline-info">
+                            <i class="bi bi-gear"></i> Configuración
+                        </a>
+                        <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#eliminarModal">
+                            <i class="bi bi-trash"></i> Eliminar Empresa
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sección de Monitoreo de Descargas -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="card-title mb-0">Archivos Descargados Hoy</h5>
+        </div>
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <span class="badge bg-primary" id="estadoMonitoreo">INACTIVO</span>
+                    <span class="ms-2" id="contadorDescargas">0 archivos</span>
+                </div>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-success" onclick="ejecutarOperacion('iniciar')" id="btnIniciar">
+                        <i class="fas fa-play"></i> Iniciar
+                    </button>
+                    <button type="button" class="btn btn-danger" onclick="ejecutarOperacion('detener')" id="btnDetener" disabled>
+                        <i class="fas fa-stop"></i> Detener
+                    </button>
+                    <button type="button" class="btn btn-warning" onclick="ejecutarOperacion('reiniciar')" id="btnReiniciar" disabled>
+                        <i class="fas fa-sync"></i> Reiniciar
+                    </button>
+                </div>
+            </div>
+            
+            <div id="listaDescargas">
+                <!-- La lista se actualizará dinámicamente -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Amenazas -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3 class="card-title h5 mb-0">Amenazas Detectadas</h3>
+                    <span class="badge bg-danger">{{ amenazas.paginator.count }} amenazas</span>
+                </div>
+                <div class="card-body p-0">
+                    {% if amenazas %}
+                        <div class="list-group list-group-flush">
+                            {% for amenaza in amenazas %}
+                                <div class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div class="flex-grow-1">
+                                            <h6 class="mb-1">
+                                                <i class="bi bi-exclamation-circle-fill text-danger"></i>
+                                                {{ amenaza.get_tipo_display }}
+                                            </h6>
+                                            <p class="mb-1">{{ amenaza.descripcion }}</p>
+                                            {% if amenaza.detalles_tecnicos %}
+                                                <div class="mt-2">
+                                                    <button class="btn btn-sm btn-outline-primary" type="button" 
+                                                            data-bs-toggle="collapse" 
+                                                            data-bs-target="#detalles-{{ amenaza.id }}">
+                                                        Ver Detalles Técnicos
+                                                    </button>
+                                                    <div class="collapse mt-2" id="detalles-{{ amenaza.id }}">
+                                                        <div class="card card-body detalles-tecnicos">
+                                                            <h6 class="mb-2">Detalles del Archivo:</h6>
+                                                            <ul class="list-unstyled mb-0">
+                                                                {% if amenaza.detalles_tecnicos.razones_sospechosas %}
+                                                                    <li><strong>Razones de Alerta:</strong>
+                                                                        <ul>
+                                                                            {% for razon in amenaza.detalles_tecnicos.razones_sospechosas %}
+                                                                                <li>{{ razon }}</li>
+                                                                            {% endfor %}
+                                                                        </ul>
+                                                                    </li>
+                                                                {% endif %}
+                                                                {% if amenaza.detalles_tecnicos.explicacion_extension %}
+                                                                    <li><strong>Tipo de Archivo:</strong> {{ amenaza.detalles_tecnicos.explicacion_extension }}</li>
+                                                                {% endif %}
+                                                                {% if amenaza.detalles_tecnicos.directorio_critico %}
+                                                                    <li><strong>Ubicación:</strong> {{ amenaza.detalles_tecnicos.directorio_critico }}</li>
+                                                                {% endif %}
+                                                                {% if amenaza.detalles_tecnicos.hash_md5 %}
+                                                                    <li><strong>Hash MD5:</strong> <code>{{ amenaza.detalles_tecnicos.hash_md5 }}</code></li>
+                                                                {% endif %}
+                                                                {% if amenaza.detalles_tecnicos.ruta %}
+                                                                    <li><strong>Ruta Completa:</strong> <code>{{ amenaza.detalles_tecnicos.ruta }}</code></li>
+                                                                {% endif %}
+                                                                {% if amenaza.detalles_tecnicos.tamaño %}
+                                                                    <li><strong>Tamaño:</strong> {{ amenaza.detalles_tecnicos.tamaño|filesizeformat }}</li>
+                                                                {% endif %}
+                                                                {% if amenaza.detalles_tecnicos.fecha_modificacion %}
+                                                                    <li><strong>Última Modificación:</strong> {{ amenaza.detalles_tecnicos.fecha_modificacion|date:"d/m/Y H:i" }}</li>
+                                                                {% endif %}
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            {% endif %}
+                                            <small class="text-muted d-block mt-2">
+                                                <i class="bi bi-clock"></i> {{ amenaza.fecha_deteccion|date:"d/m/Y H:i" }}
+                                                {% if amenaza.resuelta %}
+                                                    <span class="badge bg-success ms-2">Resuelta</span>
+                                                {% endif %}
+                                            </small>
+                                        </div>
+                                        <div class="ms-3">
+                                            <span class="badge {% if amenaza.severidad == 'ALTA' %}bg-danger{% elif amenaza.severidad == 'MEDIA' %}bg-warning{% else %}bg-info{% endif %}">
+                                                {{ amenaza.get_severidad_display }}
+                                            </span>
+                                            {% if not amenaza.resuelta %}
+                                                <form method="post" action="{% url 'marcar_amenaza_resuelta' amenaza.pk %}" class="d-inline">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn btn-sm btn-success ms-2">
+                                                        <i class="bi bi-check-circle"></i> Resolver
+                                                    </button>
+                                                </form>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        
+                        <!-- Paginación de Amenazas -->
+                        {% if amenazas.paginator.num_pages > 1 %}
+                            <nav class="mt-3 px-3 pb-3">
+                                <ul class="pagination justify-content-center mb-0">
+                                    {% if amenazas.has_previous %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page_amenazas=1{% if request.GET.page_actividades %}&page_actividades={{ request.GET.page_actividades }}{% endif %}">&laquo; Primera</a>
+                                        </li>
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page_amenazas={{ amenazas.previous_page_number }}{% if request.GET.page_actividades %}&page_actividades={{ request.GET.page_actividades }}{% endif %}">Anterior</a>
+                                        </li>
+                                    {% endif %}
+                                    
+                                    <li class="page-item disabled">
+                                        <span class="page-link">
+                                            Página {{ amenazas.number }} de {{ amenazas.paginator.num_pages }}
+                                        </span>
+                                    </li>
+                                    
+                                    {% if amenazas.has_next %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page_amenazas={{ amenazas.next_page_number }}{% if request.GET.page_actividades %}&page_actividades={{ request.GET.page_actividades }}{% endif %}">Siguiente</a>
+                                        </li>
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page_amenazas={{ amenazas.paginator.num_pages }}{% if request.GET.page_actividades %}&page_actividades={{ request.GET.page_actividades }}{% endif %}">Última &raquo;</a>
+                                        </li>
+                                    {% endif %}
+                                </ul>
+                            </nav>
+                        {% endif %}
+                    {% else %}
+                        <div class="p-4 text-center text-muted">
+                            <i class="bi bi-shield-check display-4"></i>
+                            <p class="mt-2 mb-0">No se han detectado amenazas</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Actividades -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3 class="card-title h5 mb-0">Registro de Actividades</h3>
+                    <span class="badge bg-primary">{{ actividades.paginator.count }} actividades</span>
+                </div>
+                <div class="card-body p-0">
+                    {% if actividades %}
+                        <div class="list-group list-group-flush">
+                            {% for actividad in actividades %}
+                                <div class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <h6 class="mb-1">
+                                                {% if actividad.tipo == 'ESCANEO' %}
+                                                    <i class="bi bi-search text-primary"></i>
+                                                {% elif actividad.tipo == 'ALERTA' %}
+                                                    <i class="bi bi-exclamation-triangle text-warning"></i>
+                                                {% elif actividad.tipo == 'ACTUALIZACION' %}
+                                                    <i class="bi bi-arrow-clockwise text-success"></i>
+                                                {% else %}
+                                                    <i class="bi bi-gear text-info"></i>
+                                                {% endif %}
+                                                {{ actividad.get_tipo_display }}
+                                            </h6>
+                                            <p class="mb-1">{{ actividad.descripcion }}</p>
+                                            {% if actividad.detalles %}
+                                                <div class="mt-2">
+                                                    <button class="btn btn-sm btn-outline-primary" type="button" 
+                                                            data-bs-toggle="collapse" 
+                                                            data-bs-target="#detalles-actividad-{{ actividad.id }}">
+                                                        Ver Detalles
+                                                    </button>
+                                                    <div class="collapse mt-2" id="detalles-actividad-{{ actividad.id }}">
+                                                        <div class="card card-body detalles-tecnicos">
+                                                            <pre class="mb-0"><code>{{ actividad.detalles|pprint }}</code></pre>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            {% endif %}
+                                            <small class="text-muted">
+                                                {{ actividad.fecha|date:"d/m/Y H:i" }}
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        
+                        <!-- Paginación de Actividades -->
+                        {% if actividades.paginator.num_pages > 1 %}
+                            <nav class="mt-3 px-3 pb-3">
+                                <ul class="pagination justify-content-center mb-0">
+                                    {% if actividades.has_previous %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page_actividades=1{% if request.GET.page_amenazas %}&page_amenazas={{ request.GET.page_amenazas }}{% endif %}">&laquo; Primera</a>
+                                        </li>
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page_actividades={{ actividades.previous_page_number }}{% if request.GET.page_amenazas %}&page_amenazas={{ request.GET.page_amenazas }}{% endif %}">Anterior</a>
+                                        </li>
+                                    {% endif %}
+                                    
+                                    <li class="page-item disabled">
+                                        <span class="page-link">
+                                            Página {{ actividades.number }} de {{ actividades.paginator.num_pages }}
+                                        </span>
+                                    </li>
+                                    
+                                    {% if actividades.has_next %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page_actividades={{ actividades.next_page_number }}{% if request.GET.page_amenazas %}&page_amenazas={{ request.GET.page_amenazas }}{% endif %}">Siguiente</a>
+                                        </li>
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page_actividades={{ actividades.paginator.num_pages }}{% if request.GET.page_amenazas %}&page_amenazas={{ request.GET.page_amenazas }}{% endif %}">Última &raquo;</a>
+                                        </li>
+                                    {% endif %}
+                                </ul>
+                            </nav>
+                        {% endif %}
+                    {% else %}
+                        <div class="p-4 text-center text-muted">
+                            <i class="bi bi-clock-history display-4"></i>
+                            <p class="mt-2 mb-0">No hay actividades registradas</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Eliminación -->
+<div class="modal fade" id="eliminarModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirmar Eliminación</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>¿Estás seguro de que deseas eliminar la empresa "{{ empresa.Nombre_Empresa }}"?</p>
+                <p class="text-danger">Esta acción no se puede deshacer.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <form method="post" action="{% url 'eliminar_empresa' empresa.pk %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Eliminar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .progress {
+        height: 8px;  /* Reducir altura de la barra */
+        width: 200px; /* Ancho fijo más pequeño */
+        margin: 5px 0;
+    }
+    .progress-bar {
+        transition: width 0.3s ease;
+    }
+    .badge {
+        font-size: 0.85em;
+        padding: 0.4em 0.6em;
+    }
+    .alert {
+        padding: 0.5rem 1rem;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+    }
+</style>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Definir la variable empresa con los datos del contexto
+const empresa = {
+    id: {{ empresa.id }},
+    nombre: "{{ empresa.Nombre_Empresa|escapejs }}"
+};
+
+// Estado global del monitoreo
+const estadoMonitoreo = {
+    activo: false,
+    actualizando: false
+};
+
+// Elementos del DOM
+let elementos = {};
+
+// Función para inicializar elementos del DOM
+function inicializarElementos() {
+    console.log('Inicializando elementos del DOM...');
+    
+    elementos = {
+        estadoMonitoreo: document.getElementById('estadoMonitoreo'),
+        contadorDescargas: document.getElementById('contadorDescargas'),
+        btnIniciar: document.getElementById('btnIniciar'),
+        btnDetener: document.getElementById('btnDetener'),
+        btnReiniciar: document.getElementById('btnReiniciar'),
+        listaDescargas: document.getElementById('listaDescargas'),
+        csrfToken: document.querySelector('[name=csrfmiddlewaretoken]')
+    };
+
+    // Verificar que todos los elementos necesarios existen
+    const elementosRequeridos = ['estadoMonitoreo', 'contadorDescargas', 'btnIniciar', 'btnDetener', 'btnReiniciar', 'listaDescargas', 'csrfToken'];
+    const elementosFaltantes = elementosRequeridos.filter(id => !elementos[id]);
+    
+    if (elementosFaltantes.length > 0) {
+        console.error('Elementos del DOM faltantes:', elementosFaltantes);
+        mostrarError('Error al inicializar la interfaz. Por favor, recargue la página.');
+        return false;
+    }
+
+    // Verificar el token CSRF
+    if (!elementos.csrfToken || !elementos.csrfToken.value) {
+        console.error('Token CSRF no encontrado o inválido');
+        mostrarError('Error de seguridad: Token CSRF no encontrado');
+        return false;
+    }
+
+    // Inicializar el toast de error
+    const toastError = document.getElementById('mensajeError');
+    if (toastError) {
+        elementos.mensajeError = new bootstrap.Toast(toastError);
+        elementos.mensajeErrorTexto = document.getElementById('mensajeErrorTexto');
+    }
+
+    // Agregar event listeners a los botones
+    elementos.btnIniciar.addEventListener('click', function(e) {
+        e.preventDefault();
+        console.log('Botón Iniciar clickeado');
+        ejecutarOperacion('iniciar');
+    });
+
+    elementos.btnDetener.addEventListener('click', function(e) {
+        e.preventDefault();
+        console.log('Botón Detener clickeado');
+        ejecutarOperacion('detener');
+    });
+
+    elementos.btnReiniciar.addEventListener('click', function(e) {
+        e.preventDefault();
+        console.log('Botón Reiniciar clickeado');
+        ejecutarOperacion('reiniciar');
+    });
+
+    console.log('Elementos del DOM inicializados correctamente');
+    return true;
+}
+
+// Función para mostrar errores
+function mostrarError(mensaje) {
+    console.error('Error:', mensaje);
+    estadoMonitoreo.error = mensaje;
+    
+    if (elementos.mensajeError && elementos.mensajeErrorTexto) {
+        elementos.mensajeErrorTexto.textContent = mensaje;
+        elementos.mensajeError.show();
+    } else {
+        alert(mensaje); // Fallback si el toast no está disponible
+    }
+}
+
+// Función para actualizar la interfaz con los datos del estado
+function actualizarInterfaz(data) {
+    // Actualizar badge de estado
+    const estadoBadge = document.getElementById('estadoMonitoreo');
+    if (estadoBadge) {
+        estadoBadge.textContent = data.estado;
+        estadoBadge.className = `badge ${data.estado === 'MONITOREANDO' ? 'bg-success' : 'bg-secondary'}`;
+    }
+
+    // Actualizar contador de descargas
+    const contadorDescargas = document.getElementById('contadorDescargas');
+    if (contadorDescargas) {
+        contadorDescargas.textContent = data.descargas_activas;
+    }
+
+    // Actualizar lista de descargas
+    const listaDescargas = document.getElementById('listaDescargas');
+    if (listaDescargas) {
+        if (data.descargas_info && data.descargas_info.length > 0) {
+            listaDescargas.innerHTML = data.descargas_info.map(descarga => `
+                <div class="list-group-item">
+                    <div class="d-flex w-100 justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-1">${descarga.nombre}</h6>
+                            <small class="text-muted">${descarga.tamaño}</small>
+                        </div>
+                        <span class="badge bg-${descarga.estado_color}">${descarga.estado}</span>
+                    </div>
+                    ${descarga.error ? `<div class="text-danger mt-2">${descarga.error}</div>` : ''}
+                </div>
+            `).join('');
+        } else {
+            listaDescargas.innerHTML = `
+                <div class="list-group-item text-center text-muted">
+                    No hay archivos descargados hoy
+                </div>
+            `;
+        }
+    }
+
+    // Actualizar botones
+    const btnIniciar = document.getElementById('btnIniciar');
+    const btnDetener = document.getElementById('btnDetener');
+    const btnReiniciar = document.getElementById('btnReiniciar');
+
+    if (btnIniciar) btnIniciar.disabled = data.estado === 'MONITOREANDO';
+    if (btnDetener) btnDetener.disabled = data.estado !== 'MONITOREANDO';
+    if (btnReiniciar) btnReiniciar.disabled = data.estado !== 'MONITOREANDO';
+}
+
+// Función para ejecutar operaciones de monitoreo
+function ejecutarOperacion(operacion) {
+    if (estadoMonitoreo.actualizando) {
+        return;
+    }
+    
+    estadoMonitoreo.actualizando = true;
+    
+    const urls = {
+        'iniciar': `/empresa/{{ empresa.id }}/iniciar-monitoreo/`,
+        'detener': `/empresa/{{ empresa.id }}/detener-monitoreo/`,
+        'reiniciar': `/empresa/{{ empresa.id }}/reiniciar-monitoreo/`
+    };
+    
+    fetch(urls[operacion], {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            estadoMonitoreo.activo = operacion === 'iniciar';
+            actualizarEstado();
+        } else {
+            alert(data.message || 'Error al ejecutar la operación');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error al ejecutar la operación: ' + error.message);
+    })
+    .finally(() => {
+        estadoMonitoreo.actualizando = false;
+    });
+}
+
+// Función para actualizar el estado
+function actualizarEstado() {
+    if (!estadoMonitoreo.activo) {
+        return;
+    }
+    
+    fetch(`/empresa/{{ empresa.id }}/estado-monitoreo/`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            actualizarInterfaz(data);
+            if (estadoMonitoreo.activo) {
+                setTimeout(actualizarEstado, 2000);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            if (estadoMonitoreo.activo) {
+                setTimeout(actualizarEstado, 2000);
+            }
+        });
+}
+
+// Inicializar estado al cargar la página
+document.addEventListener('DOMContentLoaded', () => {
+    actualizarEstado();
+});
+</script>
+{% endblock %} 

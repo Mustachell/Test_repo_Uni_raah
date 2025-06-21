@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header bg-danger text-white">
+            <h5 class="mb-0">Error en el Escaneo</h5>
+        </div>
+        <div class="card-body">
+            <div class="alert alert-danger">
+                <h4 class="alert-heading">¡Ha ocurrido un error!</h4>
+                <p>{{ mensaje }}</p>
+            </div>
+            <div class="mt-3">
+                <a href="{% url 'detalle_empresa' empresa.id %}" class="btn btn-primary">
+                    <i class="bi bi-arrow-left"></i> Volver a la Empresa
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block title %}Resolver Amenaza - {{ amenaza.empresa.Nombre_Empresa }}{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'home' %}">Inicio</a></li>
+                <li class="breadcrumb-item">
+                    <a href="{% url 'detalle_empresa' amenaza.empresa.pk %}">
+                        {{ amenaza.empresa.Nombre_Empresa }}
+                    </a>
+                </li>
+                <li class="breadcrumb-item active">Resolver Amenaza</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-warning">
+                <h3 class="card-title mb-0 text-white">
+                    <i class="bi bi-exclamation-triangle"></i> Resolver Amenaza
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <h5 class="alert-heading">Detalles de la Amenaza</h5>
+                    <p class="mb-0">
+                        <strong>Empresa:</strong> {{ amenaza.empresa.Nombre_Empresa }}<br>
+                        <strong>Tipo:</strong> {{ amenaza.get_tipo_display }}<br>
+                        <strong>Severidad:</strong> 
+                        <span class="badge {% if amenaza.severidad == 'ALTA' %}bg-danger
+                                         {% elif amenaza.severidad == 'MEDIA' %}bg-warning
+                                         {% else %}bg-success{% endif %}">
+                            {{ amenaza.get_severidad_display }}
+                        </span><br>
+                        <strong>Fecha de Detección:</strong> {{ amenaza.fecha_deteccion|date:"d/m/Y H:i" }}<br>
+                        <strong>Descripción:</strong> {{ amenaza.descripcion }}
+                    </p>
+                </div>
+
+                {% if amenaza.detalles_tecnicos %}
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">Detalles Técnicos</h5>
+                        </div>
+                        <div class="card-body">
+                            <pre class="mb-0"><code>{{ amenaza.detalles_tecnicos|pprint }}</code></pre>
+                        </div>
+                    </div>
+                {% endif %}
+
+                <div class="alert alert-warning">
+                    <h5 class="alert-heading">¿Está seguro de marcar esta amenaza como resuelta?</h5>
+                    <p class="mb-0">
+                        Esta acción registrará la fecha y hora de resolución de la amenaza.
+                        Asegúrese de haber tomado las medidas necesarias para mitigar la amenaza antes de proceder.
+                    </p>
+                </div>
+
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-check-circle"></i> Confirmar Resolución
+                        </button>
+                        <a href="{% url 'detalle_empresa' amenaza.empresa.pk %}" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left"></i> Volver
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,254 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard de Seguridad - Aegis Code{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Estadísticas Generales -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <i class="bi bi-shield-exclamation display-4 text-danger mb-3"></i>
+                    <h3 class="card-title h5">Total Amenazas</h3>
+                    <p class="display-6 mb-0">{{ total_amenazas }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <i class="bi bi-exclamation-triangle display-4 text-warning mb-3"></i>
+                    <h3 class="card-title h5">Amenazas Activas</h3>
+                    <p class="display-6 mb-0">{{ amenazas_activas.paginator.count }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <i class="bi bi-graph-up display-4 text-success mb-3"></i>
+                    <h3 class="card-title h5">Escaneos Realizados</h3>
+                    <p class="display-6 mb-0">{{ total_escaneos }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <i class="bi bi-building display-4 text-primary mb-3"></i>
+                    <h3 class="card-title h5">Empresas Monitoreadas</h3>
+                    <p class="display-6 mb-0">{{ empresas.count }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Lista de Amenazas -->
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3 class="card-title h5 mb-0">Amenazas Activas</h3>
+                    <span class="badge bg-danger">{{ amenazas_activas.paginator.count }} amenazas</span>
+                </div>
+                <div class="card-body p-0">
+                    {% if amenazas_activas %}
+                        <div class="list-group list-group-flush">
+                            {% for amenaza in amenazas_activas %}
+                                <div class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div class="flex-grow-1">
+                                            <h6 class="mb-1">
+                                                <i class="bi bi-exclamation-circle-fill text-danger"></i>
+                                                {{ amenaza.get_tipo_display }}
+                                            </h6>
+                                            <p class="mb-1">{{ amenaza.descripcion }}</p>
+                                            {% if amenaza.detalles_tecnicos %}
+                                                <div class="mt-2">
+                                                    <button class="btn btn-sm btn-outline-primary" type="button" 
+                                                            data-bs-toggle="collapse" 
+                                                            data-bs-target="#detalles-{{ amenaza.id }}">
+                                                        Ver Detalles Técnicos
+                                                    </button>
+                                                    <div class="collapse mt-2" id="detalles-{{ amenaza.id }}">
+                                                        <div class="card card-body detalles-tecnicos">
+                                                            <h6 class="mb-2">Detalles del Archivo:</h6>
+                                                            <ul class="list-unstyled mb-0">
+                                                                {% if amenaza.detalles_tecnicos.razones_sospechosas %}
+                                                                    <li><strong>Razones de Alerta:</strong>
+                                                                        <ul>
+                                                                            {% for razon in amenaza.detalles_tecnicos.razones_sospechosas %}
+                                                                                <li>{{ razon }}</li>
+                                                                            {% endfor %}
+                                                                        </ul>
+                                                                    </li>
+                                                                {% endif %}
+                                                                {% if amenaza.detalles_tecnicos.explicacion_extension %}
+                                                                    <li><strong>Tipo de Archivo:</strong> {{ amenaza.detalles_tecnicos.explicacion_extension }}</li>
+                                                                {% endif %}
+                                                                {% if amenaza.detalles_tecnicos.directorio_critico %}
+                                                                    <li><strong>Ubicación:</strong> {{ amenaza.detalles_tecnicos.directorio_critico }}</li>
+                                                                {% endif %}
+                                                                {% if amenaza.detalles_tecnicos.hash_md5 %}
+                                                                    <li><strong>Hash MD5:</strong> <code>{{ amenaza.detalles_tecnicos.hash_md5 }}</code></li>
+                                                                {% endif %}
+                                                                {% if amenaza.detalles_tecnicos.ruta %}
+                                                                    <li><strong>Ruta Completa:</strong> <code>{{ amenaza.detalles_tecnicos.ruta }}</code></li>
+                                                                {% endif %}
+                                                                {% if amenaza.detalles_tecnicos.tamaño %}
+                                                                    <li><strong>Tamaño:</strong> {{ amenaza.detalles_tecnicos.tamaño|filesizeformat }}</li>
+                                                                {% endif %}
+                                                                {% if amenaza.detalles_tecnicos.fecha_modificacion %}
+                                                                    <li><strong>Última Modificación:</strong> {{ amenaza.detalles_tecnicos.fecha_modificacion|date:"d/m/Y H:i" }}</li>
+                                                                {% endif %}
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            {% endif %}
+                                            <small class="text-muted d-block mt-2">
+                                                <i class="bi bi-building"></i> {{ amenaza.empresa.Nombre_Empresa }} - 
+                                                <i class="bi bi-clock"></i> {{ amenaza.fecha_deteccion|date:"d/m/Y H:i" }}
+                                            </small>
+                                        </div>
+                                        <div class="ms-3">
+                                            <span class="badge {% if amenaza.severidad == 'ALTA' %}bg-danger{% elif amenaza.severidad == 'MEDIA' %}bg-warning{% else %}bg-info{% endif %}">
+                                                {{ amenaza.get_severidad_display }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        
+                        <!-- Paginación -->
+                        {% if amenazas_activas.paginator.num_pages > 1 %}
+                            <nav class="mt-3 px-3 pb-3">
+                                <ul class="pagination justify-content-center mb-0">
+                                    {% if amenazas_activas.has_previous %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page=1{% if request.GET.tipo %}&tipo={{ request.GET.tipo }}{% endif %}{% if request.GET.empresa %}&empresa={{ request.GET.empresa }}{% endif %}{% if request.GET.fecha_desde %}&fecha_desde={{ request.GET.fecha_desde }}{% endif %}{% if request.GET.fecha_hasta %}&fecha_hasta={{ request.GET.fecha_hasta }}{% endif %}">&laquo; Primera</a>
+                                        </li>
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ amenazas_activas.previous_page_number }}{% if request.GET.tipo %}&tipo={{ request.GET.tipo }}{% endif %}{% if request.GET.empresa %}&empresa={{ request.GET.empresa }}{% endif %}{% if request.GET.fecha_desde %}&fecha_desde={{ request.GET.fecha_desde }}{% endif %}{% if request.GET.fecha_hasta %}&fecha_hasta={{ request.GET.fecha_hasta }}{% endif %}">Anterior</a>
+                                        </li>
+                                    {% endif %}
+                                    
+                                    <li class="page-item disabled">
+                                        <span class="page-link">
+                                            Página {{ amenazas_activas.number }} de {{ amenazas_activas.paginator.num_pages }}
+                                        </span>
+                                    </li>
+                                    
+                                    {% if amenazas_activas.has_next %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ amenazas_activas.next_page_number }}{% if request.GET.tipo %}&tipo={{ request.GET.tipo }}{% endif %}{% if request.GET.empresa %}&empresa={{ request.GET.empresa }}{% endif %}{% if request.GET.fecha_desde %}&fecha_desde={{ request.GET.fecha_desde }}{% endif %}{% if request.GET.fecha_hasta %}&fecha_hasta={{ request.GET.fecha_hasta }}{% endif %}">Siguiente</a>
+                                        </li>
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ amenazas_activas.paginator.num_pages }}{% if request.GET.tipo %}&tipo={{ request.GET.tipo }}{% endif %}{% if request.GET.empresa %}&empresa={{ request.GET.empresa }}{% endif %}{% if request.GET.fecha_desde %}&fecha_desde={{ request.GET.fecha_desde }}{% endif %}{% if request.GET.fecha_hasta %}&fecha_hasta={{ request.GET.fecha_hasta }}{% endif %}">Última &raquo;</a>
+                                        </li>
+                                    {% endif %}
+                                </ul>
+                            </nav>
+                        {% endif %}
+                    {% else %}
+                        <div class="p-4 text-center text-muted">
+                            <i class="bi bi-shield-check display-4"></i>
+                            <p class="mt-2 mb-0">No hay amenazas activas</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel Lateral -->
+        <div class="col-md-4">
+            <!-- Amenazas por Tipo -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3 class="card-title h5 mb-0">Amenazas por Tipo</h3>
+                </div>
+                <div class="card-body">
+                    <canvas id="amenazasChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Actividad Reciente -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title h5 mb-0">Actividad Reciente</h3>
+                </div>
+                <div class="card-body p-0">
+                    {% if actividad_reciente %}
+                        <div class="list-group list-group-flush">
+                            {% for actividad in actividad_reciente %}
+                                <div class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <h6 class="mb-1">{{ actividad.get_tipo_display }}</h6>
+                                            <p class="mb-1 small">{{ actividad.descripcion }}</p>
+                                            <small class="text-muted">
+                                                {{ actividad.fecha|date:"d/m/Y H:i" }}
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="p-3 text-center text-muted">
+                            <i class="bi bi-clock-history display-4"></i>
+                            <p class="mt-2 mb-0">No hay actividad reciente</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Gráfico de amenazas por tipo
+    const ctx = document.getElementById('amenazasChart').getContext('2d');
+    const data = {
+        labels: [
+            {% for tipo, count in amenazas_por_tipo.items %}
+                '{{ tipo }}',
+            {% endfor %}
+        ],
+        datasets: [{
+            data: [
+                {% for tipo, count in amenazas_por_tipo.items %}
+                    {{ count }},
+                {% endfor %}
+            ],
+            backgroundColor: [
+                '#dc3545',  // Rojo
+                '#ffc107',  // Amarillo
+                '#0dcaf0',  // Azul
+                '#198754',  // Verde
+                '#6c757d'   // Gris
+            ]
+        }]
+    };
+    
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: data,
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}
+{% endblock %} 

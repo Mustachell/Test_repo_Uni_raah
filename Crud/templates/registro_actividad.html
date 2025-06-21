@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+
+{% block title %}Registro de Actividad - Aegis Code{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <!-- Sidebar de filtros -->
+        <div class="col-md-3">
+            <div class="card sticky-top" style="top: 1rem;">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Filtros</h5>
+                </div>
+                <div class="card-body">
+                    <form method="get" class="mb-3">
+                        <div class="mb-3">
+                            <label for="tipo" class="form-label">Tipo de Actividad</label>
+                            <select name="tipo" id="tipo" class="form-select">
+                                <option value="">Todos</option>
+                                <option value="ESCANEO" {% if request.GET.tipo == 'ESCANEO' %}selected{% endif %}>Escaneo de Sistema</option>
+                                <option value="ACTUALIZACION" {% if request.GET.tipo == 'ACTUALIZACION' %}selected{% endif %}>Actualización de Seguridad</option>
+                                <option value="ALERTA" {% if request.GET.tipo == 'ALERTA' %}selected{% endif %}>Alerta de Seguridad</option>
+                                <option value="CONFIGURACION" {% if request.GET.tipo == 'CONFIGURACION' %}selected{% endif %}>Cambio de Configuración</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="empresa" class="form-label">Empresa</label>
+                            <select name="empresa" id="empresa" class="form-select">
+                                <option value="">Todas</option>
+                                {% for empresa in empresas %}
+                                    <option value="{{ empresa.id }}" {% if request.GET.empresa == empresa.id|stringformat:"i" %}selected{% endif %}>
+                                        {{ empresa.Nombre_Empresa }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="fecha_desde" class="form-label">Fecha Desde</label>
+                            <input type="date" name="fecha_desde" id="fecha_desde" class="form-control" value="{{ request.GET.fecha_desde }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="fecha_hasta" class="form-label">Fecha Hasta</label>
+                            <input type="date" name="fecha_hasta" id="fecha_hasta" class="form-control" value="{{ request.GET.fecha_hasta }}">
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-funnel"></i> Filtrar
+                        </button>
+                    </form>
+                    <a href="{% url 'registro_actividad' %}" class="btn btn-outline-secondary w-100">
+                        <i class="bi bi-x-circle"></i> Limpiar Filtros
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lista de registros -->
+        <div class="col-md-9">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>Registro de Actividad</h2>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-outline-primary" onclick="exportarCSV()">
+                        <i class="bi bi-file-earmark-excel"></i> Exportar CSV
+                    </button>
+                    <button type="button" class="btn btn-outline-primary" onclick="exportarPDF()">
+                        <i class="bi bi-file-earmark-pdf"></i> Exportar PDF
+                    </button>
+                </div>
+            </div>
+
+            {% if actividades %}
+                <div class="card">
+                    <div class="card-body">
+                        {% for actividad in actividades %}
+                            <div class="log-entry {% if actividad.tipo == 'ALERTA' %}danger{% elif actividad.tipo == 'ESCANEO' %}info{% elif actividad.tipo == 'ACTUALIZACION' %}success{% else %}warning{% endif %}">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <span class="log-timestamp">{{ actividad.fecha|date:"d/m/Y H:i:s" }}</span>
+                                        <span class="log-user ms-2">{{ actividad.usuario.username }}</span>
+                                        <span class="log-action ms-2">{{ actividad.get_tipo_display }}</span>
+                                        {% if actividad.empresa %}
+                                            <span class="badge bg-secondary ms-2">{{ actividad.empresa.Nombre_Empresa }}</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <p class="log-details mt-2 mb-0">{{ actividad.descripcion }}</p>
+                                {% if actividad.detalles %}
+                                    <div class="mt-2">
+                                        <button class="btn btn-sm btn-link p-0" type="button" data-bs-toggle="collapse" data-bs-target="#detalles-{{ actividad.id }}">
+                                            Ver detalles técnicos
+                                        </button>
+                                        <div class="collapse mt-2" id="detalles-{{ actividad.id }}">
+                                            <pre class="bg-dark p-2 rounded"><code>{{ actividad.detalles|pprint }}</code></pre>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Paginación -->
+                {% if actividades.has_other_pages %}
+                    <nav class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            {% if actividades.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ actividades.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                        <i class="bi bi-chevron-left"></i>
+                                    </a>
+                                </li>
+                            {% endif %}
+
+                            {% for num in actividades.paginator.page_range %}
+                                {% if actividades.number == num %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ num }}</span>
+                                    </li>
+                                {% else %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                            {{ num }}
+                                        </a>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if actividades.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ actividades.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                        <i class="bi bi-chevron-right"></i>
+                                    </a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                {% endif %}
+            {% else %}
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i> No se encontraron registros de actividad.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function exportarCSV() {
+        // Implementar exportación a CSV
+        alert('Funcionalidad de exportación a CSV en desarrollo');
+    }
+
+    function exportarPDF() {
+        // Implementar exportación a PDF
+        alert('Funcionalidad de exportación a PDF en desarrollo');
+    }
+</script>
+{% endblock %} 

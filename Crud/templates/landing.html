@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+
+{% block title %}Sistema de Seguridad Empresarial - Protección Integral{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="container-fluid bg-primary text-white py-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <h1 class="display-4 fw-bold mb-4">
+                    Protección Empresarial Inteligente
+                </h1>
+                <p class="lead mb-4">
+                    Monitoreo continuo, detección de amenazas y respuesta proactiva para proteger su empresa
+                    contra ciberamenazas emergentes.
+                </p>
+                <div class="d-grid gap-2 d-md-flex">
+                    <a href="{% url 'register' %}" class="btn btn-light btn-lg px-4 me-md-2">
+                        Comenzar Ahora
+                    </a>
+                    <a href="#caracteristicas" class="btn btn-outline-light btn-lg px-4">
+                        Conocer Más
+                    </a>
+                </div>
+            </div>
+            <div class="col-md-6 text-center">
+                <img src="https://cdn-icons-png.flaticon.com/512/2092/2092663.png" 
+                     alt="Seguridad Empresarial" class="img-fluid" style="max-width: 400px;">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Características -->
+<div id="caracteristicas" class="container py-5">
+    <h2 class="text-center mb-5">Características Principales</h2>
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <i class="bi bi-shield-check display-4 text-primary mb-3"></i>
+                    <h3 class="card-title h4">Monitoreo Continuo</h3>
+                    <p class="card-text">
+                        Vigilancia 24/7 de su infraestructura con detección proactiva de amenazas
+                        y análisis en tiempo real.
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <i class="bi bi-graph-up-arrow display-4 text-primary mb-3"></i>
+                    <h3 class="card-title h4">Dashboard Intuitivo</h3>
+                    <p class="card-text">
+                        Visualización clara de amenazas, estadísticas y estado de seguridad
+                        de su empresa en tiempo real.
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <i class="bi bi-bell display-4 text-primary mb-3"></i>
+                    <h3 class="card-title h4">Alertas Personalizadas</h3>
+                    <p class="card-text">
+                        Notificaciones configurables según el nivel de amenaza y las necesidades
+                        específicas de su empresa.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Beneficios -->
+<div class="container-fluid bg-light py-5">
+    <div class="container">
+        <h2 class="text-center mb-5">¿Por qué elegirnos?</h2>
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="d-flex align-items-start">
+                    <i class="bi bi-check-circle-fill text-success fs-4 me-3"></i>
+                    <div>
+                        <h4>Protección Integral</h4>
+                        <p class="text-muted">
+                            Cubrimos todos los aspectos de la seguridad empresarial, desde la detección
+                            de malware hasta la prevención de phishing.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="d-flex align-items-start">
+                    <i class="bi bi-check-circle-fill text-success fs-4 me-3"></i>
+                    <div>
+                        <h4>Fácil de Implementar</h4>
+                        <p class="text-muted">
+                            Configuración rápida y sencilla, sin necesidad de conocimientos técnicos
+                            avanzados.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="d-flex align-items-start">
+                    <i class="bi bi-check-circle-fill text-success fs-4 me-3"></i>
+                    <div>
+                        <h4>Escalable</h4>
+                        <p class="text-muted">
+                            Adaptable a empresas de cualquier tamaño, desde pequeñas empresas
+                            hasta grandes corporaciones.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="d-flex align-items-start">
+                    <i class="bi bi-check-circle-fill text-success fs-4 me-3"></i>
+                    <div>
+                        <h4>Soporte Continuo</h4>
+                        <p class="text-muted">
+                            Asistencia técnica permanente y actualizaciones regulares para mantener
+                            su sistema protegido.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CTA -->
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 text-center">
+            <h2 class="mb-4">¿Listo para proteger su empresa?</h2>
+            <p class="lead mb-4">
+                Únase a cientos de empresas que ya confían en nuestro sistema
+                de seguridad empresarial.
+            </p>
+            <a href="{% url 'register' %}" class="btn btn-primary btn-lg px-5">
+                Comenzar Gratis
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %} 

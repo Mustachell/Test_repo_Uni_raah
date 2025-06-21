@@ -1,0 +1,205 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Aegis Code{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+    <!-- Hero Section -->
+    <section class="hero-section text-center py-5">
+        <div class="container">
+            <h1 class="display-4 fw-bold mb-4">Protección Digital Inteligente</h1>
+            <p class="lead mb-4">Donde la protección se escribe en código</p>
+            <div class="d-flex justify-content-center gap-3">
+                <a href="#empresas" class="btn btn-primary btn-lg">
+                    <i class="bi bi-building"></i> Ver Empresas
+                </a>
+                <a href="{% url 'dashboard_seguridad' %}" class="btn btn-outline-light btn-lg">
+                    <i class="bi bi-shield-check"></i> Panel de Seguridad
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Estadísticas Rápidas -->
+    <section class="py-5 bg-light">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-md-3">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <i class="bi bi-building display-4 text-primary mb-3"></i>
+                            <h3 class="card-title h5">Empresas Monitoreadas</h3>
+                            <p class="display-6 mb-0">{{ empresas.count }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <i class="bi bi-shield-exclamation display-4 text-danger mb-3"></i>
+                            <h3 class="card-title h5">Amenazas Activas</h3>
+                            <p class="display-6 mb-0">{{ amenazas_recientes.count }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <i class="bi bi-graph-up display-4 text-success mb-3"></i>
+                            <h3 class="card-title h5">Escaneos Realizados</h3>
+                            <p class="display-6 mb-0">{{ total_escaneos }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <i class="bi bi-clock-history display-4 text-info mb-3"></i>
+                            <h3 class="card-title h5">Actividades Recientes</h3>
+                            <p class="display-6 mb-0">{{ actividades_recientes.count }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Empresas y Alertas -->
+    <section id="empresas" class="py-5">
+        <div class="container">
+            <div class="row">
+                <!-- Lista de Empresas -->
+                <div class="col-md-8">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2>Empresas Monitoreadas</h2>
+                        <a href="{% url 'crear_empresa' %}" class="btn btn-primary">
+                            <i class="bi bi-plus-circle"></i> Nueva Empresa
+                        </a>
+                    </div>
+                    
+                    {% if empresas %}
+                        <div class="row g-4">
+                            {% for empresa in empresas %}
+                                <div class="col-md-6">
+                                    <div class="card h-100">
+                                        {% if empresa.imagen %}
+                                            <img src="{{ empresa.imagen.url }}" class="card-img-top" alt="{{ empresa.Nombre_Empresa }}" style="height: 200px; object-fit: cover;">
+                                        {% endif %}
+                                        <div class="card-body">
+                                            <h3 class="card-title h5">{{ empresa.Nombre_Empresa }}</h3>
+                                            <p class="card-text">
+                                                <small class="text-muted">
+                                                    <i class="bi bi-people"></i> {{ empresa.Cant_Empleados }} empleados
+                                                </small>
+                                            </p>
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <span class="badge {% if empresa.nivel_seguridad == 'ALTO' %}bg-success{% elif empresa.nivel_seguridad == 'MEDIO' %}bg-warning{% else %}bg-danger{% endif %}">
+                                                    {{ empresa.get_nivel_seguridad_display }}
+                                                </span>
+                                                <a href="{% url 'detalle_empresa' empresa.pk %}" class="btn btn-outline-primary btn-sm">
+                                                    Ver Detalles
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i> No hay empresas registradas.
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Panel de Alertas -->
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title h5 mb-0">Alertas Recientes</h3>
+                        </div>
+                        <div class="card-body p-0">
+                            {% if amenazas_recientes %}
+                                <div class="list-group list-group-flush">
+                                    {% for amenaza in amenazas_recientes %}
+                                        <div class="list-group-item">
+                                            <div class="d-flex justify-content-between align-items-start">
+                                                <div>
+                                                    <h6 class="mb-1">{{ amenaza.get_tipo_display }}</h6>
+                                                    <p class="mb-1 small">{{ amenaza.descripcion }}</p>
+                                                    <small class="text-muted">
+                                                        {{ amenaza.empresa.Nombre_Empresa }} - 
+                                                        {{ amenaza.fecha_deteccion|date:"d/m/Y H:i" }}
+                                                    </small>
+                                                </div>
+                                                <span class="badge {% if amenaza.severidad == 'ALTA' %}bg-danger{% elif amenaza.severidad == 'MEDIA' %}bg-warning{% else %}bg-info{% endif %}">
+                                                    {{ amenaza.get_severidad_display }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <div class="p-3 text-center text-muted">
+                                    <i class="bi bi-check-circle display-4"></i>
+                                    <p class="mt-2 mb-0">No hay alertas activas</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Actividad Reciente -->
+                    <div class="card mt-4">
+                        <div class="card-header">
+                            <h3 class="card-title h5 mb-0">Actividad Reciente</h3>
+                        </div>
+                        <div class="card-body p-0">
+                            {% if actividades_recientes %}
+                                <div class="list-group list-group-flush">
+                                    {% for actividad in actividades_recientes %}
+                                        <div class="list-group-item">
+                                            <div class="d-flex justify-content-between align-items-start">
+                                                <div>
+                                                    <h6 class="mb-1">{{ actividad.get_tipo_display }}</h6>
+                                                    <p class="mb-1 small">{{ actividad.descripcion }}</p>
+                                                    <small class="text-muted">
+                                                        {{ actividad.fecha|date:"d/m/Y H:i" }}
+                                                    </small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <div class="p-3 text-center text-muted">
+                                    <i class="bi bi-clock-history display-4"></i>
+                                    <p class="mt-2 mb-0">No hay actividad reciente</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<style>
+    .hero-section {
+        background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1550751827-4bd374c3f58b?ixlib=rb-4.0.3');
+        background-size: cover;
+        background-position: center;
+        color: white;
+        padding: 100px 0;
+    }
+    
+    @media (max-width: 768px) {
+        .hero-section {
+            padding: 60px 0;
+        }
+        .hero-section h1 {
+            font-size: 2rem;
+        }
+    }
+</style>
+{% endblock %} 

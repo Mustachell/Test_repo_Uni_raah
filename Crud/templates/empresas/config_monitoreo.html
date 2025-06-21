@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% block title %}Configuración de Monitoreo - {{ empresa.Nombre_Empresa }}{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'home' %}">Inicio</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'detalle_empresa' empresa.pk %}">{{ empresa.Nombre_Empresa }}</a></li>
+                <li class="breadcrumb-item active">Configuración de Monitoreo</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title mb-0">
+                    <i class="bi bi-gear"></i> Configuración de Monitoreo
+                </h3>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    {% csrf_token %}
+                    
+                    <div class="mb-4">
+                        <h5>Escaneo Automático</h5>
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" id="escaneo_automatico" 
+                                   name="escaneo_automatico" {% if config.escaneo_automatico %}checked{% endif %}>
+                            <label class="form-check-label" for="escaneo_automatico">
+                                Activar escaneo automático
+                            </label>
+                        </div>
+                        <div class="mb-3">
+                            <label for="frecuencia_escaneo" class="form-label">Frecuencia de Escaneo (horas)</label>
+                            <input type="number" class="form-control" id="frecuencia_escaneo" 
+                                   name="frecuencia_escaneo" value="{{ config.frecuencia_escaneo }}" 
+                                   min="1" max="168">
+                            <div class="form-text">
+                                Intervalo entre escaneos automáticos (1-168 horas)
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <h5>Notificaciones</h5>
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" id="notificar_amenazas" 
+                                   name="notificar_amenazas" {% if config.notificar_amenazas %}checked{% endif %}>
+                            <label class="form-check-label" for="notificar_amenazas">
+                                Activar notificaciones de amenazas
+                            </label>
+                        </div>
+                        <div class="mb-3">
+                            <label for="nivel_alertas" class="form-label">Nivel de Alertas</label>
+                            <select class="form-select" id="nivel_alertas" name="nivel_alertas">
+                                <option value="TODAS" {% if config.nivel_alertas == 'TODAS' %}selected{% endif %}>
+                                    Todas las alertas
+                                </option>
+                                <option value="MEDIA_ALTA" {% if config.nivel_alertas == 'MEDIA_ALTA' %}selected{% endif %}>
+                                    Media y Alta
+                                </option>
+                                <option value="ALTA" {% if config.nivel_alertas == 'ALTA' %}selected{% endif %}>
+                                    Solo Alta
+                                </option>
+                            </select>
+                            <div class="form-text">
+                                Seleccione qué nivel de amenazas desea recibir notificaciones
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save"></i> Guardar Configuración
+                        </button>
+                        <a href="{% url 'detalle_empresa' empresa.pk %}" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left"></i> Volver
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

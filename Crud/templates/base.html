@@ -1,0 +1,406 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>{% block title %}Aegis Code - Soluciones de Ciberseguridad{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        /* Variables de tema */
+        :root[data-bs-theme="dark"] {
+            --bs-body-bg: #121212;
+            --bs-body-color: #ffffff;
+            --card-bg: #1e1e1e;
+            --card-border: #2d2d2d;
+            --navbar-bg: #1a1a1a;
+            --hover-bg: #2d2d2d;
+            --text-muted: #a0a0a0;
+            --text-color: #ffffff;
+            --code-bg: #2d2d2d;
+            --code-color: #e0e0e0;
+            --details-bg: #2d2d2d;
+            --details-color: #ffffff;
+        }
+
+        :root[data-bs-theme="light"] {
+            --bs-body-bg: #f8f9fa;
+            --bs-body-color: #212529;
+            --card-bg: #ffffff;
+            --card-border: #dee2e6;
+            --navbar-bg: #ffffff;
+            --hover-bg: #f8f9fa;
+            --text-muted: #6c757d;
+            --text-color: #212529;
+            --code-bg: #f8f9fa;
+            --code-color: #212529;
+            --details-bg: #f8f9fa;
+            --details-color: #212529;
+        }
+
+        /* Estilos generales */
+        body {
+            background-color: var(--bs-body-bg);
+            color: var(--text-color);
+            padding-top: 56px; /* Espacio para la navbar fija */
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-color: var(--card-border);
+            color: var(--text-color);
+            transition: transform 0.3s;
+        }
+
+        .navbar {
+            background-color: var(--navbar-bg) !important;
+            color: var(--text-color);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1030;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .navbar-dark .navbar-nav .nav-link {
+            color: var(--text-color);
+        }
+
+        .table {
+            color: var(--text-color);
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: var(--hover-bg);
+        }
+
+        .text-muted {
+            color: var(--text-muted) !important;
+        }
+        
+        /* Estilos existentes */
+        html {
+            font-size: 16px;
+        }
+        
+        @media (max-width: 768px) {
+            html {
+                font-size: 14px;
+            }
+            .navbar-brand {
+                font-size: 1.2rem;
+            }
+            .nav-link {
+                padding: 0.5rem 0.5rem;
+            }
+            .btn-group {
+                display: flex;
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            .btn-group .btn {
+                width: 100%;
+            }
+        }
+
+        .alert {
+            margin-bottom: 1rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,.1);
+        }
+
+        .alert pre {
+            margin: 0.5rem 0;
+            padding: 0.5rem;
+            background-color: var(--code-bg);
+            color: var(--code-color);
+            border-radius: 0.25rem;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .alert .alert-dismissible {
+            padding-right: 3rem;
+        }
+
+        .alert .btn-close {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+        }
+
+        .severidad-alta { color: #ff6b6b; }
+        .severidad-media { color: #ffd93d; }
+        .severidad-baja { color: #6bff6b; }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .theme-switch {
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: background-color 0.3s;
+        }
+        
+        .theme-switch:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Nuevos estilos para el registro en línea */
+        .log-entry {
+            border-left: 4px solid #0d6efd;
+            padding-left: 1rem;
+            margin-bottom: 1rem;
+        }
+        .log-entry.warning { border-left-color: #ffc107; }
+        .log-entry.danger { border-left-color: #dc3545; }
+        .log-entry.success { border-left-color: #198754; }
+        .log-entry.info { border-left-color: #0dcaf0; }
+        
+        .log-timestamp {
+            font-size: 0.875rem;
+            color: #6c757d;
+        }
+        
+        .log-user {
+            font-weight: bold;
+            color: #0d6efd;
+        }
+        
+        .log-action {
+            font-weight: 500;
+        }
+        
+        .log-details {
+            font-size: 0.9rem;
+            color: #adb5bd;
+        }
+
+        .list-group-item {
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            border-color: var(--card-border);
+        }
+
+        /* Estilos para detalles técnicos y extensiones */
+        .detalles-tecnicos {
+            background-color: var(--details-bg);
+            color: var(--details-color);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .detalles-tecnicos pre {
+            background-color: var(--code-bg);
+            color: var(--code-color);
+            padding: 0.5rem;
+            border-radius: 0.25rem;
+            margin: 0.5rem 0;
+        }
+
+        .detalles-tecnicos ul {
+            margin-bottom: 0.5rem;
+        }
+
+        .detalles-tecnicos li {
+            margin-bottom: 0.25rem;
+        }
+
+        .detalles-tecnicos strong {
+            color: var(--text-color);
+        }
+
+        /* Ajustes para la paginación */
+        .pagination {
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .page-link {
+            background-color: var(--card-bg);
+            border-color: var(--card-border);
+            color: var(--text-color);
+        }
+
+        .page-link:hover {
+            background-color: var(--hover-bg);
+            color: var(--text-color);
+        }
+
+        .page-item.active .page-link {
+            background-color: var(--bs-primary);
+            border-color: var(--bs-primary);
+        }
+
+        .page-item.disabled .page-link {
+            background-color: var(--card-bg);
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'landing' %}">
+                <i class="bi bi-shield-lock-fill"></i> Aegis Code
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    {% if user.is_authenticated %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'home' %}">
+                                <i class="bi bi-house"></i> Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'dashboard_seguridad' %}">
+                                <i class="bi bi-graph-up"></i> Seguridad
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'manual_usuario' %}">
+                                <i class="bi bi-book"></i> Manual
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'registro_actividad' %}">
+                                <i class="bi bi-journal-text"></i> Registro
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'crear_empresa' %}">
+                                <i class="bi bi-building-add"></i> Nueva Empresa
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+                <ul class="navbar-nav">
+                    {% if user.is_authenticated %}
+                        <li class="nav-item">
+                            <span class="nav-link text-light">
+                                <i class="bi bi-person-circle"></i> {{ user.username }}
+                            </span>
+                        </li>
+                        <li class="nav-item">
+                            <form method="post" action="{% url 'logout' %}" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="nav-link border-0 bg-transparent">
+                                    <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
+                                </button>
+                            </form>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'login' %}">
+                                <i class="bi bi-box-arrow-in-right"></i> Iniciar Sesión
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'register' %}">
+                                <i class="bi bi-person-plus"></i> Registrarse
+                            </a>
+                        </li>
+                    {% endif %}
+                    <li class="nav-item">
+                        <button class="nav-link theme-switch" id="themeSwitch" title="Cambiar tema">
+                            <i class="bi bi-moon-stars"></i>
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {% if message.tags == 'error' %}
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                {% elif message.tags == 'success' %}
+                <i class="bi bi-check-circle-fill me-2"></i>
+                {% elif message.tags == 'warning' %}
+                <i class="bi bi-exclamation-circle-fill me-2"></i>
+                {% elif message.tags == 'info' %}
+                <i class="bi bi-info-circle-fill me-2"></i>
+                {% endif %}
+                
+                {% if '\n' in message.message %}
+                <pre>{{ message.message }}</pre>
+                {% else %}
+                {{ message.message }}
+                {% endif %}
+                
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        {% block content %}
+        {% endblock %}
+    </div>
+
+    <footer class="footer mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>Aegis Code</h5>
+                    <p>Tu socio en ciberseguridad</p>
+                </div>
+                <div class="col-md-6">
+                    <h5>Síguenos</h5>
+                    <div class="social-links">
+                        <a href="#" class="text-white me-2"><i class="bi bi-linkedin"></i></a>
+                        <a href="#" class="text-white me-2"><i class="bi bi-twitter"></i></a>
+                        <a href="#" class="text-white"><i class="bi bi-facebook"></i></a>
+                    </div>
+                </div>
+            </div>
+            <hr class="mt-4">
+            <div class="text-center">
+                <p class="mb-0">&copy; 2024 Aegis Code. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Cambio de tema
+        document.addEventListener('DOMContentLoaded', function() {
+            const themeSwitch = document.getElementById('themeSwitch');
+            const html = document.documentElement;
+            const icon = themeSwitch.querySelector('i');
+
+            // Verificar tema guardado
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'light') {
+                html.setAttribute('data-bs-theme', 'light');
+                icon.classList.replace('bi-moon-stars', 'bi-sun');
+            }
+
+            themeSwitch.addEventListener('click', function() {
+                if (html.getAttribute('data-bs-theme') === 'dark') {
+                    html.setAttribute('data-bs-theme', 'light');
+                    icon.classList.replace('bi-moon-stars', 'bi-sun');
+                    localStorage.setItem('theme', 'light');
+                } else {
+                    html.setAttribute('data-bs-theme', 'dark');
+                    icon.classList.replace('bi-sun', 'bi-moon-stars');
+                    localStorage.setItem('theme', 'dark');
+                }
+            });
+        });
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html> 
